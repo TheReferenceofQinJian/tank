@@ -16,7 +16,7 @@ public class MyPanel extends JPanel implements KeyListener {
     int enemyTenksSizis = 3;
     public MyPanel(){
         hero = new Hero(100, 100);  //初始化自己的坦克
-        hero.setSpeed(5);  //甚至我方坦克行驶速度
+        hero.setSpeed(5);  //设置我方坦克行驶速度
         for (int i = 0; i < enemyTenksSizis; i++) {
             enemyTenks.add(new EnemyTank(100*(i+1), 0));
         }
