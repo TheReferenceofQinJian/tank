@@ -4,16 +4,24 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Vector;
 
 
 public class MyPanel extends JPanel implements KeyListener {
 
     //定义我的坦克
     Hero hero = null;
-
+    //定义敌方坦克
+    Vector<EnemyTank> enemyTenks = new Vector<>();
+    int enemyTenksSizis = 3;
     public MyPanel(){
         hero = new Hero(100, 100);  //初始化自己的坦克
-        hero.setSpeed(5);
+        hero.setSpeed(5);  //甚至我方坦克行驶速度
+        for (int i = 0; i < enemyTenksSizis; i++) {
+            enemyTenks.add(new EnemyTank(100*(i+1), 0));
+        }
+
+
     }
 
 
@@ -21,8 +29,14 @@ public class MyPanel extends JPanel implements KeyListener {
     public void paint(Graphics g){
         super.paint(g);
         g.fillRect(0, 0, 1000, 750);  //填充矩形默认蓝色
-        //画坦克
+        //画我方坦克
         drawTank(hero.getX(), hero.getY(), g, hero.getDirect(), 0);
+        //画出敌方坦克
+        for (int i = 0; i < enemyTenks.size(); i++) {
+           EnemyTank enemyTank = enemyTenks.get(i); //从容器中取出坦克
+           enemyTank.setDirect(2);  //设置敌方坦克初始化方向
+           drawTank(enemyTank.getX(), enemyTank.getY(), g, enemyTank.getDirect(),1);
+        }
 
 
     }
