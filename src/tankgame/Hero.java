@@ -21,7 +21,7 @@ public class Hero extends Tank {
     public void shotEnmyTank(){
 
         //控制子弹数量
-        if (shots.size() == 100) {
+        if (shots.size() == 5) {
             return;
         }
 

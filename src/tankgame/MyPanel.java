@@ -31,6 +31,9 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
             EnemyTank enemyTank = new EnemyTank((100 * (i + 1)), 0);
             //设置敌人坦克方向
             enemyTank.setDirect(2);
+            // 启动敌人坦克 让它动起来
+            new Thread(enemyTank).start();
+
             //给enemyTank 加入一颗子弹
             Shot shot = new Shot(enemyTank.getX() + 20, enemyTank.getY() + 60, enemyTank.getDirect());
             //加入enemyTank的Vector成员
@@ -46,7 +49,28 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
         image3 =Toolkit.getDefaultToolkit().getImage(Panel.class.getResource("/IM3.gif"));
     }
 
+    //如果们的坦克可以发射多颗子弹
+    //在判断我方子弹是否集中敌人坦克时 ，就需要把我们的子弹集合中
+    //所有的子弹都取出和敌人所有的坦克，进行判断
+    public void hitEnmyTank() {
+        //判断我方子弹是否击中了敌人的坦克
+        for (int i = 0; i < hero.shots.size(); i++) {
+            //拿到我方子弹
+            Shot shot = hero.shots.get(i);
 
+            if (shot != null && shot.islive) {//前提是 我方子弹还存活 才能打中  没按J键之前shot为 null
+
+                //不知道要打中哪个坦克 所以要遍历取出敌人坦克
+                for (int j = 0; j < enemyTanks.size(); j++) {
+                    EnemyTank enemyTank = enemyTanks.get(j);
+                    hitTank(hero.shot, enemyTank);
+                }
+
+            }
+        }
+        
+
+    }
 
     //判断我方子弹是否击中敌人坦克
     public void hitTank(Shot s, EnemyTank enemyTank) {
@@ -54,11 +78,14 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
         switch (enemyTank.getDirect()) {//根据敌人坦克的方向 ，判断坦克坐标占用面积
             case 0: //坦克的方向 向上
             case 2: //坦克的方向 向下
+                //判断子弹是否击中敌人坦克
                 if (s.getX() > enemyTank.getX() && s.getX() < enemyTank.getX() + 40 &&
                         s.getY() > enemyTank.getY() && s.getY() < enemyTank.getY() + 60
                 ) {
                     //敌方坦克生命消亡
                     enemyTank.islive = false;
+                    // 取出敌人坦克
+                    enemyTanks.remove(enemyTank);
                     //我方子弹生命消亡
                     s.islive = false;
                     //创建炸弹对象 添加到集合中
@@ -72,7 +99,11 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
                 if (s.getX() > enemyTank.getX() && s.getX() < enemyTank.getX() + 60 &&
                         s.getY() > enemyTank.getY() && s.getY() < enemyTank.getY() + 40
                 ) {
+                    //敌方坦克生命消亡
                     enemyTank.islive = false;
+                    //取出敌人坦克
+                    enemyTanks.remove(enemyTank);
+                    //我方子弹生命消亡
                     s.islive = false;
 
                 }
@@ -91,11 +122,17 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
         //画我方坦克
         drawTank(hero.getX(), hero.getY(), g, hero.getDirect(), 0);
 
-        //画出我方坦克子弹
-        if (hero.shot != null && hero.shot.islive) {
-            g.fill3DRect(hero.shot.getX(), hero.shot.getY(), 2, 2, false);
-
+        //画出我方坦克子弹个  多个画法
+        for (int i = 0; i < hero.shots.size(); i++) {
+            Shot shot = hero.shots.get(i);
+            if (shot != null && shot.islive){ //判断子弹是否还存活 存活画出
+                g.fill3DRect(shot.getX(), shot.getY(), 2, 2, false);
+            } else {
+                //子弹死亡 从集合中删除
+                hero.shots.remove(shot);
+            }
         }
+
         //如果bombs 集合中有对象 就画出
         for (int i = 0; i < bombs.size(); i++) {
             //取出炸弹
@@ -197,7 +234,7 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
                 g.fill3DRect(x + 10, y + 10, 40, 20, false);  //画出坦克的机身
                 g.drawOval(x + 20, y + 10, 20, 20);  //还出坦克圆盖
                 g.drawLine(x + 30, y + 20, x, y + 20);  //画出炮筒
-
+                break;
         }
 
 
@@ -214,23 +251,43 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
         if (e.getKeyCode() == KeyEvent.VK_W) {
             //设置坦克方向向上
             hero.setDirect(0);
-            hero.moveUp();
+            if (hero.getY() > 0){ //坦克没有超出面板
+                hero.moveUp();
+            }else {
+                System.out.println("我方坦克已经到达面板边界");
+            }
+
         } else if (e.getKeyCode() == KeyEvent.VK_D) {
             //设置坦克方向向右
             hero.setDirect(1);
-            hero.moveRiht();
+            if (hero.getX()+60 < 1000){  //坦克没有超出面板
+                hero.moveRiht();
+            }else {
+                System.out.println("我方坦克已经到达面板边界");
+            }
+
         } else if (e.getKeyCode() == KeyEvent.VK_S) {
             //设置坦克方向向下
             hero.setDirect(2);
-            hero.moveDown();
+            if (hero.getY()+60 < 750){ //坦克没有超出面板
+                hero.moveDown();
+            }else {
+                System.out.println("我方坦克已经到达面板边界");
+            }
+
         } else if (e.getKeyCode() == KeyEvent.VK_A) {
             //设置坦克方向向左
             hero.setDirect(3);
-            hero.moveLeft();
+            if (hero.getX() > 0) { //坦克没有超出面板
+                hero.moveLeft();
+            }else {
+                System.out.println("我方坦克已经到达面板边界");
+            }
+
         }
         //按下J键 我方坦克开火
         if (e.getKeyCode() == KeyEvent.VK_J) {
-
+            // 创建一颗子弹
             hero.shotEnmyTank();
         }
 
@@ -253,17 +310,7 @@ public class MyPanel extends JPanel implements KeyListener, Runnable {
                 throw new RuntimeException(e);
             }
 
-            //判断我方子弹是否击中了敌人的坦克
-            if (hero.shot != null && hero.shot.islive) {//前提是 我方子弹还存活 才能打中  没按J键之前shot为 null
-
-                //不知道要打中哪个坦克 所以要遍历取出敌人坦克
-                for (int i = 0; i < enemyTanks.size(); i++) {
-                    EnemyTank enemyTank = enemyTanks.get(i);
-                    hitTank(hero.shot, enemyTank);
-                }
-
-            }
-
+            hitEnmyTank();
             //重绘
             this.repaint();
 

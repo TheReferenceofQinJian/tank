@@ -17,7 +17,7 @@ public class TankGame extends JFrame  {
         mp = new MyPanel(); //白马踏落英，又见雪飘过
         new Thread(mp).start();  //子弹发射用到的线程
         this.add(mp);  //把面板添加到画框上（游戏绘制区域）
-        this.setSize(1000, 750);
+        this.setSize(1200, 900);
         this.addKeyListener(mp);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
